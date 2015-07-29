@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
 
-public class BookWorker {
+public class BookWorker implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(BookWorker.class);
 	private static final Pattern PATTERN = Pattern.compile(".*(<description>.*</description>).*", Pattern.DOTALL);
@@ -45,7 +45,10 @@ public class BookWorker {
 		return list;
 	}
 
+	@Override
 	public void run() {
+
+		log.debug("Processing {}", fileName);
 
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			StringBuffer sb = new StringBuffer();
@@ -83,8 +86,8 @@ public class BookWorker {
 				book.setPublisher(getSingleValue(doc, "description publish-info publisher"));
 				book.setYear(getSingleValue(doc, "description publish-info year"));
 				book.setIsbn(getSingleValue(doc, "description publish-info isbn"));
-				
-				System.out.println(book);
+
+				log.info(book.toString());
 
 			} else {
 				log.warn("<description> not found in {}", fileName);

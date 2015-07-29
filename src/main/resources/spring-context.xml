@@ -19,6 +19,9 @@
 	
 	<bean id="config" class="com.euromoby.books.Config">
 		<property name="taskPoolSize" value="${books.task.pool}" />
+		<property name="taskQueueSize" value="${books.task.queue}" />
+		<property name="location" value="${books.location}" />				
+		<property name="extension" value="${books.extension}" />
 	</bean>
 
     <tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager" />
