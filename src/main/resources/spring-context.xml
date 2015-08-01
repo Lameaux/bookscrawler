@@ -20,6 +20,7 @@
 	<bean id="config" class="com.euromoby.books.Config">
 		<property name="taskPoolSize" value="${books.task.pool}" />
 		<property name="taskQueueSize" value="${books.task.queue}" />
+		<property name="taskRetry" value="${books.task.retry}" />
 		<property name="location" value="${books.location}" />				
 		<property name="extension" value="${books.extension}" />
 	</bean>

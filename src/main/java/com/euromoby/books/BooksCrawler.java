@@ -14,11 +14,13 @@ public class BooksCrawler {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-context.xml");
 		BooksProcessor booksProcessor = context.getBean(BooksProcessor.class);
 		try {
+			log.info("Starting processing");
 			booksProcessor.startProcessing();
 		} catch (IOException e) {
 			log.error("Processing failed", e);
 		} finally {
 			context.close();
+			log.info("Done");
 		}
 	}
 

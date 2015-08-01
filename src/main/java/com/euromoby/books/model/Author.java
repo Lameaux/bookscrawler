@@ -2,16 +2,15 @@ package com.euromoby.books.model;
 
 public class Author {
 
-	private Integer id;
+	private String id;
 	private String firstName;
-	private String middleName;
 	private String lastName;
 
-	public Integer getId() {
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
@@ -21,14 +20,6 @@ public class Author {
 
 	public void setFirstName(String firstName) {
 		this.firstName = firstName;
-	}
-
-	public String getMiddleName() {
-		return middleName;
-	}
-
-	public void setMiddleName(String middleName) {
-		this.middleName = middleName;
 	}
 
 	public String getLastName() {
@@ -41,7 +32,7 @@ public class Author {
 
 	@Override
 	public String toString() {
-		return "Author [id=" + id + ", firstName=" + firstName + ", middleName=" + middleName + ", lastName=" + lastName + "]";
+		return "Author [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + "]";
 	}
 
 }

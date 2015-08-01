@@ -4,14 +4,24 @@ import java.util.List;
 
 public class Book {
 
+	private Integer id;
 	private Author author;
 	private String title;
-	private List<String> annotation;
-	private List<String> genres;
+	private String url;
+	private String annotation;
+	private List<Genre> genres;
 
 	private String publisher;
 	private String year;
 	private String isbn;
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
 	public Author getAuthor() {
 		return author;
@@ -29,20 +39,12 @@ public class Book {
 		this.title = title;
 	}
 
-	public List<String> getAnnotation() {
-		return annotation;
+	public String getUrl() {
+		return url;
 	}
 
-	public void setAnnotation(List<String> annotation) {
-		this.annotation = annotation;
-	}
-
-	public List<String> getGenres() {
-		return genres;
-	}
-
-	public void setGenres(List<String> genres) {
-		this.genres = genres;
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 	public String getPublisher() {
@@ -69,10 +71,26 @@ public class Book {
 		this.isbn = isbn;
 	}
 
+	public String getAnnotation() {
+		return annotation;
+	}
+
+	public void setAnnotation(String annotation) {
+		this.annotation = annotation;
+	}
+
+	public List<Genre> getGenres() {
+		return genres;
+	}
+
+	public void setGenres(List<Genre> genres) {
+		this.genres = genres;
+	}
+
 	@Override
 	public String toString() {
-		return "Book [author=" + author + ", title=" + title + ", annotation=" + annotation + ", genres=" + genres + ", publisher=" + publisher + ", year="
-				+ year + ", isbn=" + isbn + "]";
+		return "Book [id=" + id + ", author=" + author + ", title=" + title + ", url=" + url + ", annotation=" + annotation + ", genres=" + genres
+				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + "]";
 	}
 
 }

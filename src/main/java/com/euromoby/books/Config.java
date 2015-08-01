@@ -4,6 +4,7 @@ public class Config {
 
 	private int taskPoolSize;
 	private int taskQueueSize;
+	private int taskRetry;
 	private String location;
 	private String extension;
 
@@ -37,6 +38,14 @@ public class Config {
 
 	public void setExtension(String extension) {
 		this.extension = extension;
+	}
+
+	public int getTaskRetry() {
+		return taskRetry;
+	}
+
+	public void setTaskRetry(int taskRetry) {
+		this.taskRetry = taskRetry;
 	}
 
 }
