@@ -15,7 +15,8 @@ CREATE INDEX author_last_name on author(last_name);
 
 CREATE TABLE IF NOT EXISTS genre (
 	id VARCHAR(100) primary key,
-	title VARCHAR(255)
+	title VARCHAR(255),
+	active INT DEFAULT 0
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS book_genre (
