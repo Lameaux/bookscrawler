@@ -36,8 +36,8 @@ public class BookDao {
 
 	public void save(Book book) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, publisher, year, isbn) values (?,?,?,?,?,?,?,?)", 
-				book.getId(), book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getPublisher(),
+		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, genres, publisher, year, isbn) values (?,?,?,?,?,?,?,?,?)", 
+				book.getId(), book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenresString(), book.getPublisher(),
 				book.getYear(), book.getIsbn());
 	}
 

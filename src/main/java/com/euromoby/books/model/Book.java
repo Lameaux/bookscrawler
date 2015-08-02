@@ -10,6 +10,7 @@ public class Book {
 	private String url;
 	private String annotation;
 	private List<Genre> genres;
+	private String genresString;
 
 	private String publisher;
 	private String year;
@@ -73,6 +74,14 @@ public class Book {
 
 	public String getAnnotation() {
 		return annotation;
+	}
+
+	public String getGenresString() {
+		return genresString;
+	}
+
+	public void setGenresString(String genresString) {
+		this.genresString = genresString;
 	}
 
 	public void setAnnotation(String annotation) {

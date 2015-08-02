@@ -130,7 +130,9 @@ public class BookWorker implements Runnable {
 					genres.add(genre);
 				}
 				book.setGenres(genres);
-
+				if (!genreIds.isEmpty()) {
+					book.setGenresString(genreIds.get(0).replace("_", "-"));
+				}	
 				book.setPublisher(getSingleValue(doc, "description publish-info publisher"));
 				book.setYear(getSingleValue(doc, "description publish-info year"));
 				book.setIsbn(getSingleValue(doc, "description publish-info isbn"));

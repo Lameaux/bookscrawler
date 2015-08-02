@@ -31,8 +31,12 @@ CREATE TABLE IF NOT EXISTS book (
 	title VARCHAR(255),
 	url VARCHAR(255),
 	annotation TEXT,
+	genres TEXT,
 	publisher VARCHAR(255),
 	year VARCHAR(255),
-	isbn VARCHAR(255)
+	isbn VARCHAR(255),
+	views INT DEFAULT 0,
+	likes INT DEFAULT 0
 ) ENGINE=InnoDB;
+CREATE INDEX book_author_id on book(author_id);
 
