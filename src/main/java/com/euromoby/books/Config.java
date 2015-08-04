@@ -6,6 +6,7 @@ public class Config {
 	private int taskQueueSize;
 	private int taskRetry;
 	private String location;
+	private String destination;
 	private String extension;
 
 	public int getTaskPoolSize() {
@@ -46,6 +47,14 @@ public class Config {
 
 	public void setTaskRetry(int taskRetry) {
 		this.taskRetry = taskRetry;
+	}
+
+	public String getDestination() {
+		return destination;
+	}
+
+	public void setDestination(String destination) {
+		this.destination = destination;
 	}
 
 }

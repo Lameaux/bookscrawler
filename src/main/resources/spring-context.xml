@@ -22,6 +22,7 @@
 		<property name="taskQueueSize" value="${books.task.queue}" />
 		<property name="taskRetry" value="${books.task.retry}" />
 		<property name="location" value="${books.location}" />				
+		<property name="destination" value="${books.destination}" />	
 		<property name="extension" value="${books.extension}" />
 	</bean>
 

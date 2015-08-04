@@ -1,7 +1,5 @@
 package com.euromoby.books.model;
 
-import java.util.List;
-
 public class Book {
 
 	private Integer id;
@@ -9,12 +7,13 @@ public class Book {
 	private String title;
 	private String url;
 	private String annotation;
-	private List<Genre> genres;
-	private String genresString;
+	private String genre;
 
 	private String publisher;
 	private String year;
 	private String isbn;
+
+	private String lang;
 
 	public Integer getId() {
 		return id;
@@ -76,30 +75,30 @@ public class Book {
 		return annotation;
 	}
 
-	public String getGenresString() {
-		return genresString;
-	}
-
-	public void setGenresString(String genresString) {
-		this.genresString = genresString;
-	}
-
 	public void setAnnotation(String annotation) {
 		this.annotation = annotation;
 	}
 
-	public List<Genre> getGenres() {
-		return genres;
+	public String getGenre() {
+		return genre;
 	}
 
-	public void setGenres(List<Genre> genres) {
-		this.genres = genres;
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
 	}
 
 	@Override
 	public String toString() {
-		return "Book [id=" + id + ", author=" + author + ", title=" + title + ", url=" + url + ", annotation=" + annotation + ", genres=" + genres
-				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + "]";
+		return "Book [id=" + id + ", author=" + author + ", title=" + title + ", url=" + url + ", annotation=" + annotation + ", genre=" + genre
+				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + ", lang=" + lang + "]";
 	}
 
 }

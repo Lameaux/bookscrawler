@@ -1,32 +1,32 @@
 package com.euromoby.books;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.io.File;
 import java.io.FileReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
+import org.xml.sax.InputSource;
 
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
-import com.euromoby.books.model.Genre;
 import com.euromoby.books.utils.SeoUtils;
+import com.euromoby.books.utils.TextUtils;
 import com.euromoby.books.utils.TranslitUtils;
 
 public class BookWorker implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(BookWorker.class);
-	private static final Pattern DESCRIPTION_PATTERN = Pattern.compile(".*(<description>.*</description>).*", Pattern.DOTALL);
 	private static final Pattern ENCODING_PATTERN = Pattern.compile("<\\?xml.*encoding=\"([^\"]+)\".*\\?>");
 
 	private BooksManager booksManager;
@@ -37,23 +37,6 @@ public class BookWorker implements Runnable {
 		this.booksManager = booksManager;
 		this.fileName = fileName;
 		this.id = id;
-	}
-
-	private String getSingleValue(Document doc, String selector) {
-		Elements tags = doc.select(selector);
-		if (!tags.isEmpty()) {
-			return tags.get(0).text();
-		}
-		return null;
-	}
-
-	private List<String> getListValue(Document doc, String selector) {
-		List<String> list = new ArrayList<String>();
-		Elements tags = doc.select(selector);
-		for (Element tag : tags) {
-			list.add(tag.text());
-		}
-		return list;
 	}
 
 	@Override
@@ -67,81 +50,73 @@ public class BookWorker implements Runnable {
 				Matcher m = ENCODING_PATTERN.matcher(line);
 				if (m.matches()) {
 					encoding = m.group(1);
-				}				
+				}
 			}
 		} catch (Exception e) {
 			log.error("Unable to read xml header", e);
 			return;
 		}
-		
-		try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(fileName), encoding))) {
-			StringBuffer sb = new StringBuffer();
 
-			boolean descriptionFound = false;
-			for (String line; (line = br.readLine()) != null;) {
-				
-				if (line.contains("<description>")) {
-					descriptionFound = true;
-				}
-				if (descriptionFound) {
-					sb.append(line).append("\r\n");
-				}
-				if (line.contains("</description>")) {
-					break;
-				}
+		try {
+
+			String descriptionXml = TextUtils.readTagContent(fileName, encoding, "description", "", 1);
+			if (descriptionXml == null) {
+				log.warn("Description not found for book " + fileName);
+				return;
 			}
 
-			Matcher m = DESCRIPTION_PATTERN.matcher(sb.toString());
-			if (m.matches()) {
+			Book book = new Book();
+			book.setId(id);
 
-				String descriptionXml = m.group(1);
-				Document doc = Jsoup.parse(descriptionXml);
+			Author author = new Author();
 
-				Book book = new Book();
-				book.setId(id);
+			InputSource source = new InputSource(new StringReader(descriptionXml));
 
-				Author author = new Author();
-				
-				String firstName = getSingleValue(doc, "description title-info author first-name");
-				String middleName = getSingleValue(doc, "description title-info author middle-name");
-				if (middleName != null && !middleName.trim().isEmpty()) {
-					firstName += " " + middleName;
-				}
-				author.setFirstName(firstName);
-				
-				author.setLastName(getSingleValue(doc, "description title-info author last-name"));
-				String authorId = author.getLastName() + " " + author.getFirstName();
-				author.setId(SeoUtils.toPrettyURL(TranslitUtils.toTranslit(authorId)));
-				book.setAuthor(author);
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			org.w3c.dom.Document document = db.parse(source);
 
-				String title = getSingleValue(doc, "description title-info book-title");
-				book.setTitle(title);
-				book.setUrl(SeoUtils.toPrettyURL(TranslitUtils.toTranslit(title)));
-				
-				List<String> annotations = getListValue(doc, "description title-info annotation p");
-				book.setAnnotation(StringUtils.arrayToDelimitedString(annotations.toArray(), " "));
-				
-				List<Genre> genres = new ArrayList<Genre>();
-				List<String> genreIds = getListValue(doc, "description title-info genre");
-				for (String genreId : genreIds) {
-					Genre genre = new Genre();
-					genre.setId(genreId.replace("_", "-"));
-					genre.setTitle(StringUtils.capitalize(genreId.replace("_", " ")));
-					genres.add(genre);
-				}
-				book.setGenres(genres);
-				if (!genreIds.isEmpty()) {
-					book.setGenresString(genreIds.get(0).replace("_", "-"));
-				}	
-				book.setPublisher(getSingleValue(doc, "description publish-info publisher"));
-				book.setYear(getSingleValue(doc, "description publish-info year"));
-				book.setIsbn(getSingleValue(doc, "description publish-info isbn"));
+			XPathFactory xpathFactory = XPathFactory.newInstance();
+			XPath xpath = xpathFactory.newXPath();
 
-				booksManager.save(book);
+			String firstName = xpath.evaluate("/description/title-info/author/first-name", document);
+			String middleName = xpath.evaluate("/description/title-info/author/middle-name", document);
+			String lastName = xpath.evaluate("/description/title-info/author/last-name", document);
 
-			} else {
-				log.warn("<description> not found in {}", fileName);
+			if (middleName != null && !middleName.trim().isEmpty()) {
+				firstName += " " + middleName;
 			}
+			author.setFirstName(firstName);
+			author.setLastName(lastName);
+			String authorId = author.getLastName() + " " + author.getFirstName();
+			author.setId(SeoUtils.toPrettyURL(TranslitUtils.toTranslit(authorId)));
+			book.setAuthor(author);
+
+			String title = xpath.evaluate("/description/title-info/book-title", document);
+			book.setTitle(title);
+			book.setUrl(SeoUtils.toPrettyURL(TranslitUtils.toTranslit(title + " " + authorId)));
+
+			String annotation = xpath.evaluate("/description/title-info/annotation", document);
+			annotation = annotation.replaceAll("\\s+", " ").trim();
+			book.setAnnotation(annotation);
+
+			book.setLang(xpath.evaluate("/description/title-info/lang", document));
+			book.setGenre(xpath.evaluate("/description/title-info/genre", document));
+
+			book.setPublisher(xpath.evaluate("/description/publish-info/publisher", document));
+			book.setYear(xpath.evaluate("/description/publish-info/year", document));
+			book.setIsbn(xpath.evaluate("/description/publish-info/isbn", document));
+
+			booksManager.save(book);
+			
+			String coverImageId = xpath.evaluate("/description/title-info/coverpage/image/@href", document);
+			if (coverImageId.startsWith("#")) {
+				coverImageId = coverImageId.substring(1);
+				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
+				String coverFileName = fileName.replace(".fb2", ".jpg");
+				FileUtils.writeByteArrayToFile(new File(coverFileName), Base64.decodeBase64(base64Data));				
+			}
+
 		} catch (Exception e) {
 			log.error("Error processing book " + fileName, e);
 		}
