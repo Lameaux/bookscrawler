@@ -65,7 +65,7 @@ public class TextUtils {
 
 			int lastP = html.lastIndexOf("</p>");
 			if (lastP != -1) {
-				return html.substring(0, lastP);
+				return html.substring(0, lastP + "</p>".length());
 			}
 			
 			return html.toString();

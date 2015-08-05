@@ -56,6 +56,7 @@ public class BooksProcessor {
 
 		final Path rootDir = Paths.get(config.getLocation());
 		final String extension = config.getExtension();
+		final String destination = config.getDestination();		
 
 		pool.prestartAllCoreThreads();
 
@@ -71,7 +72,7 @@ public class BooksProcessor {
 					String fileName = path.toString();
 					File file = new File(fileName);
 					Integer id = Integer.parseInt(file.getName().replace(extension, ""));
-					pool.submit(new BookWorker(booksManager, fileName, id));
+					pool.submit(new BookWorker(booksManager, fileName, id, destination));
 				}
 				return FileVisitResult.CONTINUE;
 			}

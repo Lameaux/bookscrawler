@@ -20,9 +20,11 @@ import org.xml.sax.InputSource;
 
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
+import com.euromoby.books.utils.PathUtils;
 import com.euromoby.books.utils.SeoUtils;
 import com.euromoby.books.utils.TextUtils;
 import com.euromoby.books.utils.TranslitUtils;
+import com.euromoby.books.utils.ZipUtils;
 
 public class BookWorker implements Runnable {
 
@@ -32,11 +34,13 @@ public class BookWorker implements Runnable {
 	private BooksManager booksManager;
 	private String fileName;
 	private Integer id;
+	private String destination;
 
-	public BookWorker(BooksManager booksManager, String fileName, Integer id) {
+	public BookWorker(BooksManager booksManager, String fileName, Integer id, String destination) {
 		this.booksManager = booksManager;
 		this.fileName = fileName;
 		this.id = id;
+		this.destination = destination;
 	}
 
 	@Override
@@ -109,18 +113,28 @@ public class BookWorker implements Runnable {
 
 			booksManager.save(book);
 			
+			// copy fb2
+			File fb2Destination = new File(destination, PathUtils.generatePath("fb2", id, ".fb2"));
+			fb2Destination.getParentFile().mkdirs();
+			FileUtils.copyFile(new File(fileName), fb2Destination);
+			
 			String coverImageId = xpath.evaluate("/description/title-info/coverpage/image/@href", document);
 			if (coverImageId.startsWith("#")) {
 				coverImageId = coverImageId.substring(1);
 				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
-				String coverFileName = fileName.replace(".fb2", ".jpg");
-				FileUtils.writeByteArrayToFile(new File(coverFileName), Base64.decodeBase64(base64Data));				
+				
+				File jpgDestination = new File(destination, PathUtils.generatePath("jpg", id, ".jpg"));
+				jpgDestination.getParentFile().mkdirs();				
+				FileUtils.writeByteArrayToFile(jpgDestination, Base64.decodeBase64(base64Data));				
 			}
 
 			TextUtils textUtils = new TextUtils();
 			String bookText = textUtils.readBookContent(fileName, encoding, 0, 50);
-			String pageFileName = fileName.replace(".fb2", ".txt");
-			FileUtils.writeByteArrayToFile(new File(pageFileName), bookText.getBytes(encoding));			
+			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes(encoding));
+			
+			File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
+			zipDestination.getParentFile().mkdirs();
+			FileUtils.writeByteArrayToFile(zipDestination, zipped);			
 			
 		} catch (Exception e) {
 			log.error("Error processing book " + fileName, e);
