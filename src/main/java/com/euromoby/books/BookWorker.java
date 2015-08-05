@@ -117,6 +117,11 @@ public class BookWorker implements Runnable {
 				FileUtils.writeByteArrayToFile(new File(coverFileName), Base64.decodeBase64(base64Data));				
 			}
 
+			TextUtils textUtils = new TextUtils();
+			String bookText = textUtils.readBookContent(fileName, encoding, 0, 50);
+			String pageFileName = fileName.replace(".fb2", ".txt");
+			FileUtils.writeByteArrayToFile(new File(pageFileName), bookText.getBytes(encoding));			
+			
 		} catch (Exception e) {
 			log.error("Error processing book " + fileName, e);
 		}

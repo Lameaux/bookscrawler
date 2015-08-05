@@ -1,5 +1,5 @@
 CREATE DATABASE books CHARACTER SET utf8 COLLATE utf8_general_ci;
-
+use books;
 -- DROP TABLE author;
 -- DROP TABLE genre;
 -- DROP TABLE book;
