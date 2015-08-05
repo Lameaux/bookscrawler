@@ -130,7 +130,7 @@ public class BookWorker implements Runnable {
 
 			TextUtils textUtils = new TextUtils();
 			String bookText = textUtils.readBookContent(fileName, encoding, 0, 50);
-			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes(encoding));
+			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes("utf-8"));
 			
 			File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
 			zipDestination.getParentFile().mkdirs();
