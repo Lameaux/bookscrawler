@@ -124,15 +124,6 @@ public class BookWorker implements Runnable {
 			FileUtils.copyFile(new File(fileName), fb2Destination);
 			
 
-			if (coverImageId.startsWith("#")) {
-				coverImageId = coverImageId.substring(1);
-				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
-				
-				File jpgDestination = new File(destination, PathUtils.generatePath("jpg", id, ".jpg"));
-				jpgDestination.getParentFile().mkdirs();				
-				FileUtils.writeByteArrayToFile(jpgDestination, Base64.decodeBase64(base64Data));				
-			}
-
 			TextUtils textUtils = new TextUtils();
 			String bookText = textUtils.readBookContent(fileName, encoding, 0, 25);
 			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes("utf-8"));
@@ -140,6 +131,16 @@ public class BookWorker implements Runnable {
 			File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
 			zipDestination.getParentFile().mkdirs();
 			FileUtils.writeByteArrayToFile(zipDestination, zipped);			
+
+			if (coverImageId.startsWith("#")) {
+				coverImageId = coverImageId.substring(1);
+				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
+				if (base64Data != null) {
+					File jpgDestination = new File(destination, PathUtils.generatePath("jpg", id, ".jpg"));
+					jpgDestination.getParentFile().mkdirs();				
+					FileUtils.writeByteArrayToFile(jpgDestination, Base64.decodeBase64(base64Data));
+				}
+			}			
 			
 		} catch (Exception e) {
 			log.error("Error processing book " + fileName, e);

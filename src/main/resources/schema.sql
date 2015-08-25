@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS book (
 	publisher VARCHAR(255),
 	year VARCHAR(255),
 	isbn VARCHAR(255),
-	lang CHAR(3) DEFAULT 'ru',
+	lang VARCHAR(20) DEFAULT 'ru',
 	views INT DEFAULT 0,
 	likes INT DEFAULT 0,
 	has_image INT DEFAULT 0

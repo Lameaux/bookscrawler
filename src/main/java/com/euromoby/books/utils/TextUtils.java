@@ -147,7 +147,7 @@ public class TextUtils {
 				if (tagFound) {
 					sb.append(line).append("\r\n");
 				}
-				if (line.contains("</" + tag + ">") && tagFound) {
+				if (tagFound && line.contains("</" + tag + ">") && line.indexOf("</" + tag + ">") > line.indexOf("<" + tag) ) {
 					break;
 				}
 			}
