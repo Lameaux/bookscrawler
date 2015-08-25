@@ -36,9 +36,9 @@ public class BookDao {
 
 	public void save(Book book) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, genre, publisher, year, isbn, lang) values (?,?,?,?,?,?,?,?,?,?)", 
+		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, genre, publisher, year, isbn, lang, has_image) values (?,?,?,?,?,?,?,?,?,?,?)", 
 				book.getId(), book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenre(), book.getPublisher(),
-				book.getYear(), book.getIsbn(), book.getLang());
+				book.getYear(), book.getIsbn(), book.getLang(), book.isHasImage() ? 1 : 0);
 	}
 
 	static class BookRowMapper implements RowMapper<Book> {

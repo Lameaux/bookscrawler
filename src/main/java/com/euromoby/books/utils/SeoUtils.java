@@ -7,6 +7,8 @@ public class SeoUtils {
 	public static String toPrettyURL(String string) {
 	    return Normalizer.normalize(string.toLowerCase(), Form.NFD)
 	        .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
-	        .replaceAll("[^\\p{Alnum}]+", "-");
+	        .replaceAll("[^\\p{Alnum}]+", "-")
+	        .replaceAll("^-+", "")
+	        .replaceAll("-+$", "");
 	}
 }

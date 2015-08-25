@@ -15,6 +15,8 @@ public class Book {
 
 	private String lang;
 
+	private boolean hasImage;
+
 	public Integer getId() {
 		return id;
 	}
@@ -95,10 +97,18 @@ public class Book {
 		this.lang = lang;
 	}
 
+	public boolean isHasImage() {
+		return hasImage;
+	}
+
+	public void setHasImage(boolean hasImage) {
+		this.hasImage = hasImage;
+	}
+
 	@Override
 	public String toString() {
 		return "Book [id=" + id + ", author=" + author + ", title=" + title + ", url=" + url + ", annotation=" + annotation + ", genre=" + genre
-				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + ", lang=" + lang + "]";
+				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + ", lang=" + lang + ", hasImage=" + hasImage + "]";
 	}
 
 }

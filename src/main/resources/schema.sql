@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS book (
 	isbn VARCHAR(255),
 	lang CHAR(3) DEFAULT 'ru',
 	views INT DEFAULT 0,
-	likes INT DEFAULT 0
+	likes INT DEFAULT 0,
+	has_image INT DEFAULT 0
 ) ENGINE=InnoDB;
 CREATE INDEX book_author_id on book(author_id);
 CREATE INDEX book_genre on book(genre);
