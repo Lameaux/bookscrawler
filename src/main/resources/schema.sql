@@ -286,3 +286,5 @@ INSERT INTO `genre` (`id`, `title`, `active`) VALUES
 ('visual-arts', 'Изобразительное искусство, фотография', 0),
 ('visual-poetry', 'Визуальная поэзия', 0),
 ('ya', 'Подростковая литература', 0);
+
+update genre set active = 1 where exists(select 1 from book where book.genre = genre.id);

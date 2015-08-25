@@ -29,7 +29,7 @@ import com.euromoby.books.utils.ZipUtils;
 public class BookWorker implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(BookWorker.class);
-	private static final Pattern ENCODING_PATTERN = Pattern.compile("<\\?xml.*encoding=\"([^\"]+)\".*\\?>");
+	private static final Pattern ENCODING_PATTERN = Pattern.compile("<\\?xml.*encoding=\"([^\"]+)\".*\\?>.*");
 
 	private BooksManager booksManager;
 	private String fileName;
@@ -111,6 +111,11 @@ public class BookWorker implements Runnable {
 			book.setYear(xpath.evaluate("/description/publish-info/year", document));
 			book.setIsbn(xpath.evaluate("/description/publish-info/isbn", document));
 
+			String coverImageId = xpath.evaluate("/description/title-info/coverpage/image/@href", document);
+			if (coverImageId.startsWith("#")) {
+				book.setHasImage(true);
+			}
+			
 			booksManager.save(book);
 			
 			// copy fb2
@@ -118,7 +123,7 @@ public class BookWorker implements Runnable {
 			fb2Destination.getParentFile().mkdirs();
 			FileUtils.copyFile(new File(fileName), fb2Destination);
 			
-			String coverImageId = xpath.evaluate("/description/title-info/coverpage/image/@href", document);
+
 			if (coverImageId.startsWith("#")) {
 				coverImageId = coverImageId.substring(1);
 				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
