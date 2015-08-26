@@ -28,7 +28,14 @@ public class BooksManager {
 		if (bookExists != null) {
 			return;
 		}
+		if (book.getUrl() == null || book.getUrl().trim().isEmpty()) {
+			return;
+		}
 		bookDao.save(book);
+
+		if (book.getAuthor().getId() == null || book.getAuthor().getId().trim().isEmpty()) {
+			return;
+		}		
 		
 		Author authorExists = authorDao.findById(book.getAuthor().getId());
 		if (authorExists == null) {
