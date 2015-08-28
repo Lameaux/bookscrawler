@@ -3,6 +3,7 @@ package com.euromoby.books;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,10 +15,18 @@ import javax.xml.xpath.XPathFactory;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.StatusLine;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 
+import com.euromoby.books.http.HttpClientProvider;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
 import com.euromoby.books.utils.PathUtils;
@@ -30,14 +39,18 @@ public class BookWorker implements Runnable {
 
 	private static final Logger log = LoggerFactory.getLogger(BookWorker.class);
 	private static final Pattern ENCODING_PATTERN = Pattern.compile("<\\?xml.*encoding=\"([^\"]+)\".*\\?>.*");
+	private static final Pattern DIV_NEWANN_PATTERN = Pattern.compile("<div id='newann'[^>]+>.*?<b><a[^>]+>(.*?)</a></b>.*?([0-9]{2}-[0-9]{2}-[0-9]{4})<br>(.*?)<hr>.*?</div>", Pattern.DOTALL);
+	private static final String LIB_RUS_EC_URL = "http://lib.rus.ec/b/";
 
 	private BooksManager booksManager;
+	private HttpClientProvider httpClientProvider;
 	private String fileName;
 	private Integer id;
 	private String destination;
 
-	public BookWorker(BooksManager booksManager, String fileName, Integer id, String destination) {
+	public BookWorker(BooksManager booksManager, HttpClientProvider httpClientProvider, String fileName, Integer id, String destination) {
 		this.booksManager = booksManager;
+		this.httpClientProvider = httpClientProvider;
 		this.fileName = fileName;
 		this.id = id;
 		this.destination = destination;
@@ -115,37 +128,100 @@ public class BookWorker implements Runnable {
 			if (coverImageId.startsWith("#")) {
 				book.setHasImage(true);
 			}
-			
-			booksManager.save(book);
-			
+
+			// booksManager.save(book);
+
+			try {
+				grabCommentsAndRating(id);
+			} catch (Exception e) {
+				log.error("Unable to grab comments " + id, e);
+			}
+
 			// copy fb2
 			File fb2Destination = new File(destination, PathUtils.generatePath("fb2", id, ".fb2"));
 			fb2Destination.getParentFile().mkdirs();
 			FileUtils.copyFile(new File(fileName), fb2Destination);
-			
 
 			TextUtils textUtils = new TextUtils();
 			String bookText = textUtils.readBookContent(fileName, encoding, 0, 25);
 			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes("utf-8"));
-			
+
 			File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
 			zipDestination.getParentFile().mkdirs();
-			FileUtils.writeByteArrayToFile(zipDestination, zipped);			
+			FileUtils.writeByteArrayToFile(zipDestination, zipped);
 
 			if (coverImageId.startsWith("#")) {
 				coverImageId = coverImageId.substring(1);
 				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
 				if (base64Data != null) {
 					File jpgDestination = new File(destination, PathUtils.generatePath("jpg", id, ".jpg"));
-					jpgDestination.getParentFile().mkdirs();				
+					jpgDestination.getParentFile().mkdirs();
 					FileUtils.writeByteArrayToFile(jpgDestination, Base64.decodeBase64(base64Data));
 				}
-			}			
-			
+			}
+
 		} catch (Exception e) {
 			log.error("Error processing book " + fileName, e);
 		}
 
+	}
+
+	private void grabCommentsAndRating(Integer id) throws Exception {
+
+		byte[] content = loadUrl(LIB_RUS_EC_URL + id);
+		String page = new String(content, "UTF-8");
+
+		Matcher m = DIV_NEWANN_PATTERN.matcher(page);
+		while (m.find()) {
+			String user = m.group(1);
+			String date = m.group(2);
+			String comment = m.group(3);
+			comment = comment.replace("<br>", " ").trim();
+			int grade = getGrade(comment);
+			log.info("{} {} {} G: {}", user, date, comment, grade);
+		}
+		
+	}
+
+	private int getGrade(String comment) {
+		if (comment.contains("Оценка: отлично")) {
+			return 5;
+		}
+		if (comment.contains("Оценка: хорошо")) {
+			return 4;
+		}
+		if (comment.contains("Оценка: неплохо")) {
+			return 3;
+		}		
+		if (comment.contains("Оценка: плохо")) {
+			return 2;
+		}
+		if (comment.contains("Оценка: нечитаемо")) {
+			return 1;
+		}		
+		return 0;
+	}
+	
+	private byte[] loadUrl(String url) throws IOException {
+
+		HttpGet request = new HttpGet(url);
+		RequestConfig.Builder requestConfigBuilder = httpClientProvider.createRequestConfigBuilder();
+		request.setConfig(requestConfigBuilder.build());
+		CloseableHttpResponse response = httpClientProvider.executeRequest(request);
+		try {
+			StatusLine statusLine = response.getStatusLine();
+			if (statusLine.getStatusCode() != HttpStatus.SC_OK) {
+				EntityUtils.consumeQuietly(response.getEntity());
+				throw new IOException(statusLine.getStatusCode() + " " + statusLine.getReasonPhrase());
+			}
+
+			HttpEntity entity = response.getEntity();
+			byte[] content = EntityUtils.toByteArray(entity);
+			EntityUtils.consumeQuietly(entity);
+			return content;
+		} finally {
+			response.close();
+		}
 	}
 
 }

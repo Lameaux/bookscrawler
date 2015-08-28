@@ -18,6 +18,9 @@
 	<context:property-placeholder location="classpath:config.properties"/>
 	
 	<bean id="config" class="com.euromoby.books.Config">
+		<property name="clientTimeout" value="${books.timeout}" />
+		<property name="proxyHost" value="${books.proxy.host}" />
+		<property name="proxyPort" value="${books.proxy.port}" />	
 		<property name="taskPoolSize" value="${books.task.pool}" />
 		<property name="taskQueueSize" value="${books.task.queue}" />
 		<property name="taskRetry" value="${books.task.retry}" />

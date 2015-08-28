@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.euromoby.books.http.HttpClientProvider;
+
 @Component
 public class BooksProcessor {
 
@@ -25,14 +27,16 @@ public class BooksProcessor {
 	
 	private Config config;
 	private BooksManager booksManager;
+	private HttpClientProvider httpClientProvider;
 	
 	private LinkedBlockingQueue<Runnable> queue;
 	private ThreadPoolExecutor pool;
 
 	@Autowired
-	public BooksProcessor(Config config, BooksManager booksManager) {
+	public BooksProcessor(Config config, BooksManager booksManager, HttpClientProvider httpClientProvider) {
 		this.config = config;
 		this.booksManager = booksManager;
+		this.httpClientProvider = httpClientProvider; 
 		
 		queue = new LinkedBlockingQueue<Runnable>(config.getTaskQueueSize());
 		pool = new ThreadPoolExecutor(config.getTaskPoolSize(), config.getTaskPoolSize(), 0L, TimeUnit.MILLISECONDS, queue);
@@ -72,7 +76,7 @@ public class BooksProcessor {
 					String fileName = path.toString();
 					File file = new File(fileName);
 					Integer id = Integer.parseInt(file.getName().replace(extension, ""));
-					pool.submit(new BookWorker(booksManager, fileName, id, destination));
+					pool.submit(new BookWorker(booksManager, httpClientProvider, fileName, id, destination));
 				}
 				return FileVisitResult.CONTINUE;
 			}
