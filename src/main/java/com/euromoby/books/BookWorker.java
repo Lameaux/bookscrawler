@@ -24,6 +24,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -206,8 +207,7 @@ public class BookWorker implements Runnable {
 				comment.setCreated(0L);
 			}
 
-			String commentText = m.group(3);
-			commentText = commentText.replace("<br>", " ").trim();
+			String commentText = Jsoup.parse(m.group(3)).text().trim();
 			comment.setComment(commentText);
 			
 			int grade = getGrade(commentText);
