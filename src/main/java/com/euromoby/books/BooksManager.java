@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.euromoby.books.dao.AuthorDao;
 import com.euromoby.books.dao.BookDao;
+import com.euromoby.books.dao.CommentDao;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
+import com.euromoby.books.model.Comment;
 
 @Component
 public class BooksManager {
@@ -20,6 +22,32 @@ public class BooksManager {
 	private AuthorDao authorDao;
 	@Autowired
 	private BookDao bookDao;
+	@Autowired
+	private CommentDao commentDao;
+
+	
+	@Transactional(readOnly=true)	
+	public boolean commentExists(Comment comment) {
+		Comment commentExists = commentDao.find(comment.getBookId(), comment.getLogin(), comment.getCreated());
+		return commentExists != null;		
+	}
+	
+	
+	@Transactional(readOnly=true)	
+	public boolean bookExists(Integer id) {
+		Book bookExists = bookDao.findById(id);
+		return bookExists != null;		
+	}
+
+	@Transactional
+	public void save(Comment comment) {
+		Comment commentExists = commentDao.find(comment.getBookId(), comment.getLogin(), comment.getCreated());
+		if (commentExists != null) {
+			return;
+		}
+		commentDao.save(comment);
+	}
+	
 	
 	@Transactional
 	public void save(Book book) {

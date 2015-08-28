@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +31,7 @@ import org.xml.sax.InputSource;
 import com.euromoby.books.http.HttpClientProvider;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
+import com.euromoby.books.model.Comment;
 import com.euromoby.books.utils.PathUtils;
 import com.euromoby.books.utils.SeoUtils;
 import com.euromoby.books.utils.TextUtils;
@@ -59,7 +62,17 @@ public class BookWorker implements Runnable {
 	@Override
 	public void run() {
 
-		log.debug("Processing {}", fileName);
+		log.info("Processing {}", fileName);
+		
+		if (booksManager.bookExists(id)) {
+			try {
+				grabCommentsAndRating(id);
+			} catch (Exception e) {
+				log.error("Unable to grab comments " + id, e);
+			}			
+			return;
+		}
+		
 		String encoding = "utf-8";
 		try (BufferedReader br = new BufferedReader(new FileReader(fileName))) {
 			String line = br.readLine();
@@ -129,7 +142,7 @@ public class BookWorker implements Runnable {
 				book.setHasImage(true);
 			}
 
-			// booksManager.save(book);
+			booksManager.save(book);
 
 			try {
 				grabCommentsAndRating(id);
@@ -173,12 +186,28 @@ public class BookWorker implements Runnable {
 
 		Matcher m = DIV_NEWANN_PATTERN.matcher(page);
 		while (m.find()) {
-			String user = m.group(1);
-			String date = m.group(2);
-			String comment = m.group(3);
-			comment = comment.replace("<br>", " ").trim();
-			int grade = getGrade(comment);
-			log.info("{} {} {} G: {}", user, date, comment, grade);
+			
+			Comment comment = new Comment();
+			comment.setBookId(id);
+			comment.setLogin(m.group(1));
+			
+			String dateString = m.group(2);
+			SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+			try {
+				Date date = sdf.parse(dateString);
+				comment.setCreated(date.getTime());
+			} catch (Exception e) {
+				comment.setCreated(0L);
+			}
+
+			String commentText = m.group(3);
+			commentText = commentText.replace("<br>", " ").trim();
+			comment.setComment(commentText);
+			
+			int grade = getGrade(commentText);
+			comment.setGrade(grade);
+			
+			booksManager.save(comment);
 		}
 		
 	}

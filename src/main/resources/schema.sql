@@ -3,6 +3,7 @@ use books;
 -- DROP TABLE author;
 -- DROP TABLE genre;
 -- DROP TABLE book;
+-- DROP TABLE comment;
 
 
 CREATE TABLE IF NOT EXISTS author (
@@ -30,11 +31,21 @@ CREATE TABLE IF NOT EXISTS book (
 	isbn VARCHAR(255),
 	lang VARCHAR(20) DEFAULT 'ru',
 	views INT DEFAULT 0,
-	likes INT DEFAULT 0,
+	rating DECIMAL(1.2) DEFAULT 0.00,
 	has_image INT DEFAULT 0
 ) ENGINE=InnoDB;
 CREATE INDEX book_author_id on book(author_id);
 CREATE INDEX book_genre on book(genre);
+
+CREATE TABLE IF NOT EXISTS comment (
+	id INT auto_increment PRIMARY KEY,
+	book_id INT,
+	login VARCHAR(255),
+	comment TEXT,
+	grade INT,
+	created BIGINT	
+) ENGINE=InnoDB;
+CREATE INDEX comment_book_id_created_login on comment(book_id, created, login);
 
 INSERT INTO `genre` (`id`, `title`, `active`) VALUES
 ('accounting', 'Бухучет и аудит', 0),
