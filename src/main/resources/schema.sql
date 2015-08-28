@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS comment (
 	grade INT,
 	created BIGINT	
 ) ENGINE=InnoDB;
-CREATE INDEX comment_book_id_created_login on comment(book_id, created, login);
+CREATE UNIQUE INDEX comment_book_id_created_login on comment(book_id, created, login);
 
 INSERT INTO `genre` (`id`, `title`, `active`) VALUES
 ('accounting', 'Бухучет и аудит', 0),

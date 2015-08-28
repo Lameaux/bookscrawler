@@ -2,6 +2,7 @@ package com.euromoby.books.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -33,6 +34,11 @@ public class CommentDao {
 		}
 	}
 
+	public List<Comment> findByBookId(Integer bookId) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		return jdbcTemplate.query("select * from comment where book_id = ?", ROW_MAPPER, bookId);
+	}	
+	
 	public void save(Comment comment) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		jdbcTemplate.update("insert into comment(book_id, login, comment, grade, created) values (?,?,?,?,?)", comment.getBookId(), comment.getLogin(), comment.getComment(), comment.getGrade(), comment.getCreated());

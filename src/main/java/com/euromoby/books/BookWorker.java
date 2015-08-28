@@ -181,6 +181,12 @@ public class BookWorker implements Runnable {
 
 	private void grabCommentsAndRating(Integer id) throws Exception {
 
+		if (booksManager.commentsForBookExists(id)) {
+			return;
+		}
+		
+		log.info("Processing comments for " + id);
+		
 		byte[] content = loadUrl(LIB_RUS_EC_URL + id);
 		String page = new String(content, "UTF-8");
 

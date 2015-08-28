@@ -1,5 +1,7 @@
 package com.euromoby.books;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,12 @@ public class BooksManager {
 		Comment commentExists = commentDao.find(comment.getBookId(), comment.getLogin(), comment.getCreated());
 		return commentExists != null;		
 	}
-	
+
+	@Transactional(readOnly=true)	
+	public boolean commentsForBookExists(Integer bookId) {
+		List<Comment> comments = commentDao.findByBookId(bookId);
+		return !comments.isEmpty();		
+	}	
 	
 	@Transactional(readOnly=true)	
 	public boolean bookExists(Integer id) {
