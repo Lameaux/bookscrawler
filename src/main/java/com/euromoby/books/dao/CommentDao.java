@@ -41,7 +41,7 @@ public class CommentDao {
 	
 	public void save(Comment comment) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.update("insert into comment(book_id, login, comment, grade, created) values (?,?,?,?,?)", comment.getBookId(), comment.getLogin(), comment.getComment(), comment.getGrade(), comment.getCreated());
+		jdbcTemplate.update("insert into comment(book_id, login, comment, created) values (?,?,?,?)", comment.getBookId(), comment.getLogin(), comment.getComment(), comment.getCreated());
 	}
 
 	static class CommentRowMapper implements RowMapper<Comment> {
@@ -52,7 +52,6 @@ public class CommentDao {
 			comment.setBookId(rs.getInt("book_id"));
 			comment.setLogin(rs.getString("login"));
 			comment.setComment(rs.getString("comment"));
-			comment.setGrade(rs.getInt("grade"));
 			comment.setCreated(rs.getLong("created"));			
 			return comment;
 		}

@@ -1,12 +1,12 @@
 package com.euromoby.books.model;
 
-public class Comment {
+public class Grade {
 
 	private Integer id;
 	private Integer bookId;
 	private String login;
 	private Long created;
-	private String comment;
+	private Integer grade;
 
 	public Integer getId() {
 		return id;
@@ -40,17 +40,17 @@ public class Comment {
 		this.created = created;
 	}
 
-	public String getComment() {
-		return comment;
+	public Integer getGrade() {
+		return grade;
 	}
 
-	public void setComment(String comment) {
-		this.comment = comment;
+	public void setGrade(Integer grade) {
+		this.grade = grade;
 	}
 
 	@Override
 	public String toString() {
-		return "Comment [id=" + id + ", bookId=" + bookId + ", login=" + login + ", created=" + created + ", comment=" + comment + "]";
+		return "Comment [id=" + id + ", bookId=" + bookId + ", login=" + login + ", created=" + created + ", grade=" + grade + "]";
 	}
 
 }

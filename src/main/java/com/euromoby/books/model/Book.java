@@ -16,6 +16,7 @@ public class Book {
 	private String lang;
 
 	private boolean hasImage;
+	private boolean removed;
 
 	public Integer getId() {
 		return id;
@@ -109,6 +110,14 @@ public class Book {
 	public String toString() {
 		return "Book [id=" + id + ", author=" + author + ", title=" + title + ", url=" + url + ", annotation=" + annotation + ", genre=" + genre
 				+ ", publisher=" + publisher + ", year=" + year + ", isbn=" + isbn + ", lang=" + lang + ", hasImage=" + hasImage + "]";
+	}
+
+	public boolean isRemoved() {
+		return removed;
+	}
+
+	public void setRemoved(boolean removed) {
+		this.removed = removed;
 	}
 
 }

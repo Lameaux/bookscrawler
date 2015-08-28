@@ -33,6 +33,7 @@ import com.euromoby.books.http.HttpClientProvider;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
 import com.euromoby.books.model.Comment;
+import com.euromoby.books.model.Grade;
 import com.euromoby.books.utils.PathUtils;
 import com.euromoby.books.utils.SeoUtils;
 import com.euromoby.books.utils.TextUtils;
@@ -64,10 +65,10 @@ public class BookWorker implements Runnable {
 	public void run() {
 
 		log.info("Processing {}", fileName);
-		
-		if (booksManager.bookExists(id)) {
+		Book bookExists = booksManager.findById(id);
+		if (bookExists != null) {
 			try {
-				grabCommentsAndRating(id);
+				grabBookData(bookExists);
 			} catch (Exception e) {
 				log.error("Unable to grab comments " + id, e);
 			}			
@@ -90,7 +91,7 @@ public class BookWorker implements Runnable {
 
 		try {
 
-			String descriptionXml = TextUtils.readTagContent(fileName, encoding, "description", "", 1);
+			String descriptionXml = TextUtils.readTagContent(fileName, encoding, "description", "", 0);
 			if (descriptionXml == null) {
 				log.warn("Description not found for book " + fileName);
 				return;
@@ -146,7 +147,7 @@ public class BookWorker implements Runnable {
 			booksManager.save(book);
 
 			try {
-				grabCommentsAndRating(id);
+				grabBookData(book);
 			} catch (Exception e) {
 				log.error("Unable to grab comments " + id, e);
 			}
@@ -180,17 +181,24 @@ public class BookWorker implements Runnable {
 
 	}
 
-	private void grabCommentsAndRating(Integer id) throws Exception {
+	private void grabBookData(Book book) throws Exception {
 
+		Integer id = book.getId();
+		
 		if (booksManager.commentsForBookExists(id)) {
 			return;
 		}
 		
-		log.info("Processing comments for " + id);
+		log.info("Processing data for " + id);
 		
 		byte[] content = loadUrl(LIB_RUS_EC_URL + id);
 		String page = new String(content, "UTF-8");
 
+		if (page.contains("Эта книга удалена")) {
+			book.setRemoved(true);
+			booksManager.update(book);
+		}
+		
 		Matcher m = DIV_NEWANN_PATTERN.matcher(page);
 		while (m.find()) {
 			
@@ -209,11 +217,19 @@ public class BookWorker implements Runnable {
 
 			String commentText = Jsoup.parse(m.group(3)).text().trim();
 			comment.setComment(commentText);
-			
-			int grade = getGrade(commentText);
-			comment.setGrade(grade);
-			
 			booksManager.save(comment);
+			
+			int gradeValue = getGrade(commentText);
+			if (gradeValue > 0) {
+				Grade grade = new Grade();
+				grade.setBookId(comment.getBookId());
+				grade.setLogin(comment.getLogin());
+				grade.setCreated(comment.getCreated());
+				grade.setGrade(gradeValue);
+				booksManager.save(grade);
+			}
+			
+
 		}
 		
 	}

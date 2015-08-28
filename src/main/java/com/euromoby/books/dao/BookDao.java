@@ -36,11 +36,18 @@ public class BookDao {
 
 	public void save(Book book) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, genre, publisher, year, isbn, lang, has_image) values (?,?,?,?,?,?,?,?,?,?,?)", 
+		jdbcTemplate.update("insert into book(id, author_id, title, url, annotation, genre, publisher, year, isbn, lang, has_image, removed) values (?,?,?,?,?,?,?,?,?,?,?,?)", 
 				book.getId(), book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenre(), book.getPublisher(),
-				book.getYear(), book.getIsbn(), book.getLang(), book.isHasImage() ? 1 : 0);
+				book.getYear(), book.getIsbn(), book.getLang(), book.isHasImage() ? 1 : 0, book.isRemoved() ? 1 : 0);
 	}
 
+	public void update(Book book) {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+		jdbcTemplate.update("update book(author_id=?, title=?, url=?, annotation=?, genre=?, publisher=?, year=?, isbn=?, lang=?, has_image=?, removed=?) where id=?", 
+				book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenre(), book.getPublisher(),
+				book.getYear(), book.getIsbn(), book.getLang(), book.isHasImage() ? 1 : 0, book.isRemoved() ? 1 : 0, book.getId());
+	}	
+	
 	static class BookRowMapper implements RowMapper<Book> {
 		@Override
 		public Book mapRow(ResultSet rs, int rowNum) throws SQLException {

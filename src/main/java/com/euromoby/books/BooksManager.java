@@ -12,9 +12,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.euromoby.books.dao.AuthorDao;
 import com.euromoby.books.dao.BookDao;
 import com.euromoby.books.dao.CommentDao;
+import com.euromoby.books.dao.GradeDao;
 import com.euromoby.books.model.Author;
 import com.euromoby.books.model.Book;
 import com.euromoby.books.model.Comment;
+import com.euromoby.books.model.Grade;
 
 @Component
 public class BooksManager {
@@ -26,7 +28,8 @@ public class BooksManager {
 	private BookDao bookDao;
 	@Autowired
 	private CommentDao commentDao;
-
+	@Autowired
+	private GradeDao gradeDao;
 	
 	@Transactional(readOnly=true)	
 	public boolean commentExists(Comment comment) {
@@ -41,9 +44,8 @@ public class BooksManager {
 	}	
 	
 	@Transactional(readOnly=true)	
-	public boolean bookExists(Integer id) {
-		Book bookExists = bookDao.findById(id);
-		return bookExists != null;		
+	public Book findById(Integer id) {
+		return bookDao.findById(id);
 	}
 
 	@Transactional
@@ -55,6 +57,20 @@ public class BooksManager {
 		commentDao.save(comment);
 	}
 	
+	@Transactional
+	public void save(Grade grade) {
+		Grade gradeExists = gradeDao.find(grade.getBookId(), grade.getLogin());
+		if (gradeExists != null) {
+			return;
+		}
+		gradeDao.save(grade);
+		gradeDao.recalculateBookRating(grade.getBookId());
+	}
+
+	@Transactional
+	public void update(Book book) {
+		bookDao.update(book);
+	}
 	
 	@Transactional
 	public void save(Book book) {
