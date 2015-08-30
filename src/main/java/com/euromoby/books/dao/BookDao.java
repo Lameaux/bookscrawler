@@ -43,8 +43,8 @@ public class BookDao {
 
 	public void update(Book book) {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
-		jdbcTemplate.update("update book(author_id=?, title=?, url=?, annotation=?, genre=?, publisher=?, year=?, isbn=?, lang=?, has_image=?, removed=?) where id=?", 
-				book.getAuthor().getId(), book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenre(), book.getPublisher(),
+		jdbcTemplate.update("update book set title=?, url=?, annotation=?, genre=?, publisher=?, year=?, isbn=?, lang=?, has_image=?, removed=? where id=?", 
+				book.getTitle(), book.getUrl(), book.getAnnotation(), book.getGenre(), book.getPublisher(),
 				book.getYear(), book.getIsbn(), book.getLang(), book.isHasImage() ? 1 : 0, book.isRemoved() ? 1 : 0, book.getId());
 	}	
 	

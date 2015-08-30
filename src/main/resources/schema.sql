@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS grade (
 	grade INT,
 	created BIGINT	
 ) ENGINE=InnoDB;
-CREATE UNIQUE INDEX grade_book_id_created_login on grade(book_id, login);
+CREATE INDEX grade_book_id_created_login on grade(book_id, login);
 
 INSERT INTO `genre` (`id`, `title`, `active`) VALUES
 ('accounting', 'Бухучет и аудит', 0),

@@ -152,19 +152,21 @@ public class BookWorker implements Runnable {
 				log.error("Unable to grab comments " + id, e);
 			}
 
-			// copy fb2
-			File fb2Destination = new File(destination, PathUtils.generatePath("fb2", id, ".fb2"));
-			fb2Destination.getParentFile().mkdirs();
-			FileUtils.copyFile(new File(fileName), fb2Destination);
-
-			TextUtils textUtils = new TextUtils();
-			String bookText = textUtils.readBookContent(fileName, encoding, 0, 25);
-			byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes("utf-8"));
-
-			File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
-			zipDestination.getParentFile().mkdirs();
-			FileUtils.writeByteArrayToFile(zipDestination, zipped);
-
+			if (!book.isRemoved()) {			
+				// copy fb2
+				File fb2Destination = new File(destination, PathUtils.generatePath("fb2", id, ".fb2"));
+				fb2Destination.getParentFile().mkdirs();
+				FileUtils.copyFile(new File(fileName), fb2Destination);
+	
+				TextUtils textUtils = new TextUtils();
+				String bookText = textUtils.readBookContent(fileName, encoding, 0, 25);
+				byte[] zipped = ZipUtils.zipBytes(id + ".txt", bookText.getBytes("utf-8"));
+				
+				File zipDestination = new File(destination, PathUtils.generatePath("zip", id, ".zip"));
+				zipDestination.getParentFile().mkdirs();
+				FileUtils.writeByteArrayToFile(zipDestination, zipped);
+			}			
+			
 			if (coverImageId.startsWith("#")) {
 				coverImageId = coverImageId.substring(1);
 				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
@@ -200,8 +202,9 @@ public class BookWorker implements Runnable {
 		}
 		
 		Matcher m = DIV_NEWANN_PATTERN.matcher(page);
+		boolean hasComments = false;
 		while (m.find()) {
-			
+			hasComments = true;
 			Comment comment = new Comment();
 			comment.setBookId(id);
 			comment.setLogin(m.group(1));
@@ -212,7 +215,7 @@ public class BookWorker implements Runnable {
 				Date date = sdf.parse(dateString);
 				comment.setCreated(date.getTime());
 			} catch (Exception e) {
-				comment.setCreated(0L);
+				comment.setCreated(System.currentTimeMillis());
 			}
 
 			String commentText = Jsoup.parse(m.group(3)).text().trim();
@@ -229,7 +232,15 @@ public class BookWorker implements Runnable {
 				booksManager.save(grade);
 			}
 			
-
+		}
+		
+		if (!hasComments) {
+			Comment comment = new Comment();
+			comment.setBookId(id);
+			comment.setLogin("Букнига.ру");
+			comment.setCreated(System.currentTimeMillis());
+			comment.setComment("Вы уже читали эту книгу? Оставьте свой отзыв!");
+			booksManager.save(comment);
 		}
 		
 	}
