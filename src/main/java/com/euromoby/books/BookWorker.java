@@ -237,8 +237,8 @@ public class BookWorker implements Runnable {
 		if (!hasComments) {
 			Comment comment = new Comment();
 			comment.setBookId(id);
-			comment.setLogin("Букнига.ру");
-			comment.setCreated(System.currentTimeMillis());
+			comment.setLogin("bookniga");
+			comment.setCreated(0L);
 			comment.setComment("Вы уже читали эту книгу? Оставьте свой отзыв!");
 			booksManager.save(comment);
 		}
