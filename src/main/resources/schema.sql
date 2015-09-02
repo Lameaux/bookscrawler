@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS comment (
 	created BIGINT	
 ) ENGINE=InnoDB;
 CREATE INDEX comment_book_id_created_login on comment(book_id, login);
+CREATE INDEX comment_created_desc on comment(created desc);
 
 CREATE TABLE IF NOT EXISTS grade (
 	id INT auto_increment PRIMARY KEY,

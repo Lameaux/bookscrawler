@@ -169,7 +169,7 @@ public class BookWorker implements Runnable {
 			
 			if (coverImageId.startsWith("#")) {
 				coverImageId = coverImageId.substring(1);
-				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 2);
+				String base64Data = TextUtils.readTagContent(fileName, encoding, "binary", coverImageId, 1);
 				if (base64Data != null) {
 					File jpgDestination = new File(destination, PathUtils.generatePath("jpg", id, ".jpg"));
 					jpgDestination.getParentFile().mkdirs();
