@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS book (
 ) ENGINE=InnoDB;
 CREATE INDEX book_author_id on book(author_id);
 CREATE INDEX book_genre on book(genre);
+CREATE INDEX book_rating on book(rating);
 
 CREATE TABLE IF NOT EXISTS comment (
 	id INT auto_increment PRIMARY KEY,

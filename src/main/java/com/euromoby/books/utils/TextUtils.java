@@ -36,15 +36,10 @@ public class TextUtils {
 
 				if (!bodyFound && line.contains("<body")) {
 					bodyFound = true;
-					continue;
 				}
 
 				if (bodyFound) {
 					lineNum++;
-
-					if (line.contains("</body>")) {
-						break;
-					}
 
 					if (lineNum < skip) {
 						continue;
@@ -54,10 +49,25 @@ public class TextUtils {
 						break;
 					}
 
+					int bodyStart = line.indexOf("<body");
+					if (bodyStart != -1) {
+						line = line.substring(bodyStart);
+					}
+					int bodyEnd = line.indexOf("</body>");
+					if (bodyEnd != -1) {
+						line = line.substring(0, bodyEnd);
+					}
+					
 					String transformed = transform(line).trim();
 					if (!transformed.isEmpty()) {
 						html.append(transformed).append("\r\n");
 					}
+					
+					if (line.contains("</body>")) {
+						break;
+					}
+					
+					
 				}
 
 			}
